@@ -18,6 +18,7 @@ enum RuleType {
   KEYFRAME = 8,
 }
 
+const rawPublicPath = window.__INJECTED_PUBLIC_PATH_BY_QIANKUN__;
 const arrayify = <T>(list: CSSRuleList | any[]) => {
   return [].slice.call(list, 0) as T[];
 };
@@ -157,7 +158,7 @@ export class ScopedCSS {
         return `${p}${prefix} ${s.replace(/^ */, '')}`;
       }),
     );
-
+    cssText = cssText.replace(/<%= __webpack_public_path__ %>/, rawPublicPath);
     return cssText;
   }
 
@@ -201,7 +202,8 @@ export const process = (
   const tag = (mountDOM.tagName || '').toLowerCase();
 
   if (tag && stylesheetElement.tagName === 'STYLE') {
-    const prefix = `${tag}[${QiankunCSSRewriteAttr}="${appName}"]`;
-    processor.process(stylesheetElement, prefix);
+    // const prefix = `${tag}[${QiankunCSSRewriteAttr}="${appName}"]`;
+    // processor.process(stylesheetElement, prefix);
+    processor.process(stylesheetElement);
   }
 };

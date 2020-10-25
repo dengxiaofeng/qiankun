@@ -121,5 +121,8 @@
       "/__tests__/",
       "/dist/"
     ]
+  },
+  "publishConfig": {
+    "registry": "https://g.civnet.cn:4873"
   }
 }
