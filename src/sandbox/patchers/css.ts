@@ -158,6 +158,7 @@ export class ScopedCSS {
         return `${p}${prefix} ${s.replace(/^ */, '')}`;
       }),
     );
+     // @ts-ignore
     cssText = cssText.replace(/<%= __webpack_public_path__ %>/, rawPublicPath);
     return cssText;
   }
@@ -180,9 +181,11 @@ export class ScopedCSS {
 let processor: ScopedCSS;
 
 export const QiankunCSSRewriteAttr = 'data-qiankun';
+/* eslint-disable */
 export const process = (
   appWrapper: HTMLElement,
   stylesheetElement: HTMLStyleElement | HTMLLinkElement,
+   // @ts-ignore
   appName: string,
 ): void => {
   // lazy singleton pattern
