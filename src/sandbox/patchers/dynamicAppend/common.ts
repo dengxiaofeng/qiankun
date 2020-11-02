@@ -93,7 +93,7 @@ function convertLinkAsStyle(
   fetchFn(href)
     .then((res: any) => res.text())
     .then((styleContext: string) => {
-      styleElement.appendChild(document.createTextNode(styleContext));
+      styleElement.appendChild(document.createTextNode(styleContext.replace(/<%= __webpack_public_path__ %>/g, window.__INJECTED_PUBLIC_PATH_BY_QIANKUN__)));
       postProcess(styleElement);
       manualInvokeElementOnLoad(element);
     })
