@@ -4,8 +4,8 @@
  */
 import { execScripts } from 'import-html-entry';
 import { isFunction } from 'lodash';
-import { frameworkConfiguration } from '../../../apis';
 
+import { frameworkConfiguration } from '../../../apis';
 import * as css from '../css';
 
 export const rawHeadAppendChild = HTMLHeadElement.prototype.appendChild;
@@ -93,7 +93,10 @@ function convertLinkAsStyle(
   fetchFn(href)
     .then((res: any) => res.text())
     .then((styleContext: string) => {
-      styleElement.appendChild(document.createTextNode(styleContext.replace(/<%= __webpack_public_path__ %>/g, window.__INJECTED_PUBLIC_PATH_BY_QIANKUN__)));
+      const publicPath = window.__INJECTED_PUBLIC_PATH_BY_QIANKUN__;
+      const context = styleContext.replace(/<%= __webpack_public_path__ %>/g, publicPath as string);
+      /* no-param-reassign */
+      styleElement.appendChild(document.createTextNode(context));
       postProcess(styleElement);
       manualInvokeElementOnLoad(element);
     })
