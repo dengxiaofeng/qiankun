@@ -3,11 +3,16 @@
  * @since 2019-05-16
  */
 import { ImportEntryOpts } from 'import-html-entry';
-import { RegisterApplicationConfig, StartOpts, Parcel } from 'single-spa';
+import {
+  Parcel,
+  RegisterApplicationConfig,
+  StartOpts,
+} from 'single-spa';
 
 declare global {
   interface Window {
     __POWERED_BY_QIANKUN__?: boolean;
+    __webpack_public_path__?: string;
     __INJECTED_PUBLIC_PATH_BY_QIANKUN__?: string;
     __QIANKUN_DEVELOPMENT__?: boolean;
   }
