@@ -4,7 +4,7 @@
  */
 
 import { Freer } from '../../../interfaces';
-import { documentAttachProxyMap } from '../../common';
+import { getCurrentRunningSandboxProxy } from '../../common';
 import {
   ContainerConfig,
   isHijackingTag,
@@ -27,9 +27,9 @@ function patchDocumentCreateElement() {
     ): HTMLElement {
       const element = rawDocumentCreateElement.call(this, tagName, options);
       if (isHijackingTag(tagName)) {
-        const attachProxy = documentAttachProxyMap.get(this);
-        if (attachProxy) {
-          const proxyContainerConfig = proxyAttachContainerConfigMap.get(attachProxy);
+        const currentRunningSandboxProxy = getCurrentRunningSandboxProxy();
+        if (currentRunningSandboxProxy) {
+          const proxyContainerConfig = proxyAttachContainerConfigMap.get(currentRunningSandboxProxy);
           if (proxyContainerConfig) {
             elementAttachContainerConfigMap.set(element, proxyContainerConfig);
           }
@@ -94,17 +94,21 @@ export function patchStrictSandbox(
       unpatchDocumentCreate();
     }
 
-    proxyAttachContainerConfigMap.delete(proxy);
-
     recordStyledComponentsCSSRules(dynamicStyleSheetElements);
 
     // As now the sub app content all wrapped with a special id container,
     // the dynamic style sheet would be removed automatically while unmoutting
 
     return function rebuild() {
-      rebuildCSSRules(dynamicStyleSheetElements, (stylesheetElement) =>
-        rawHeadAppendChild.call(appWrapperGetter(), stylesheetElement),
-      );
+      rebuildCSSRules(dynamicStyleSheetElements, (stylesheetElement) => {
+        const appWrapper = appWrapperGetter();
+        if (!appWrapper.contains(stylesheetElement)) {
+          rawHeadAppendChild.call(appWrapper, stylesheetElement);
+          return true;
+        }
+
+        return false;
+      });
     };
   };
 }

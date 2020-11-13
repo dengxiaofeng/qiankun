@@ -5,7 +5,7 @@
  */
 import { SandBox, SandBoxType } from '../interfaces';
 import { nextTick } from '../utils';
-import { documentAttachProxyMap, getTargetValue } from './common';
+import { getTargetValue, setCurrentRunningSandboxProxy } from './common';
 
 /**
  * fastest(at most time) unique array method
@@ -14,14 +14,14 @@ import { documentAttachProxyMap, getTargetValue } from './common';
 function uniq(array: PropertyKey[]) {
   return array.filter(function filter(this: PropertyKey[], element) {
     return element in this ? false : ((this as any)[element] = true);
-  }, {});
+  }, Object.create(null));
 }
 
 // zone.js will overwrite Object.defineProperty
 const rawObjectDefineProperty = Object.defineProperty;
 
 const variableWhiteListInDev =
-  process.env.NODE_ENV === 'development'
+  process.env.NODE_ENV === 'development' || window.__QIANKUN_DEVELOPMENT__
     ? [
         // for react hot reload
         // see https://github.com/facebook/create-react-app/blob/66bf7dfc43350249e2f09d138a20840dae8a0a4a/packages/react-error-overlay/src/index.js#L180
@@ -50,7 +50,6 @@ const unscopables = {
   String: true,
   Boolean: true,
   Math: true,
-  eval: true,
   Number: true,
   Symbol: true,
   parseFloat: true,
@@ -137,6 +136,8 @@ export default class ProxySandbox implements SandBox {
 
   sandboxRunning = true;
 
+  latestSetProp: PropertyKey | null = null;
+
   active() {
     if (!this.sandboxRunning) activeSandboxCount++;
     this.sandboxRunning = true;
@@ -176,14 +177,31 @@ export default class ProxySandbox implements SandBox {
     const proxy = new Proxy(fakeWindow, {
       set(target: FakeWindow, p: PropertyKey, value: any): boolean {
         if (self.sandboxRunning) {
-          // @ts-ignore
-          target[p] = value;
-          updatedValueSet.add(p);
+          // We must kept its description while the property existed in rawWindow before
+          if (!target.hasOwnProperty(p) && rawWindow.hasOwnProperty(p)) {
+            const descriptor = Object.getOwnPropertyDescriptor(rawWindow, p);
+            const { writable, configurable, enumerable } = descriptor!;
+            if (writable) {
+              Object.defineProperty(target, p, {
+                configurable,
+                enumerable,
+                writable,
+                value,
+              });
+            }
+          } else {
+            // @ts-ignore
+            target[p] = value;
+          }
 
           if (variableWhiteList.indexOf(p) !== -1) {
             // @ts-ignore
             rawWindow[p] = value;
           }
+
+          updatedValueSet.add(p);
+
+          self.latestSetProp = p;
 
           return true;
         }
@@ -223,17 +241,28 @@ export default class ProxySandbox implements SandBox {
         }
 
         // mark the symbol to document while accessing as document.createElement could know is invoked by which sandbox for dynamic append patcher
-        if (p === 'document') {
-          documentAttachProxyMap.set(document, proxy);
+        if (p === 'document' || p === 'eval') {
+          setCurrentRunningSandboxProxy(proxy);
+          // FIXME if you have any other good ideas
           // remove the mark in next tick, thus we can identify whether it in micro app or not
-          // this approach is just a workaround, it could not cover all the complex scenarios, such as the micro app runs in the same task context with master in som case
-          // fixme if you have any other good ideas
-          nextTick(() => documentAttachProxyMap.delete(document));
-          return document;
+          // this approach is just a workaround, it could not cover all complex cases, such as the micro app runs in the same task context with master in some case
+          nextTick(() => setCurrentRunningSandboxProxy(null));
+          switch (p) {
+            case 'document':
+              return document;
+            case 'eval':
+              // eslint-disable-next-line no-eval
+              return eval;
+            // no default
+          }
         }
 
-        // eslint-disable-next-line no-bitwise
-        const value = propertiesWithGetter.has(p) ? (rawWindow as any)[p] : (target as any)[p] || (rawWindow as any)[p];
+        // eslint-disable-next-line no-nested-ternary
+        const value = propertiesWithGetter.has(p)
+          ? (rawWindow as any)[p]
+          : p in target
+          ? (target as any)[p]
+          : (rawWindow as any)[p];
         return getTargetValue(rawWindow, value);
       },
 
@@ -270,7 +299,8 @@ export default class ProxySandbox implements SandBox {
 
       // trap to support iterator with sandbox
       ownKeys(target: FakeWindow): PropertyKey[] {
-        return uniq(Reflect.ownKeys(rawWindow).concat(Reflect.ownKeys(target)));
+        const keys = uniq(Reflect.ownKeys(rawWindow).concat(Reflect.ownKeys(target)));
+        return keys;
       },
 
       defineProperty(target: Window, p: PropertyKey, attributes: PropertyDescriptor): boolean {

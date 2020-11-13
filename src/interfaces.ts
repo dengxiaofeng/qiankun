@@ -9,6 +9,7 @@ declare global {
   interface Window {
     __POWERED_BY_QIANKUN__?: boolean;
     __INJECTED_PUBLIC_PATH_BY_QIANKUN__?: string;
+    __QIANKUN_DEVELOPMENT__?: boolean;
   }
 }
 
@@ -115,6 +116,8 @@ export interface SandBox {
   proxy: WindowProxy;
   /** 沙箱是否在运行中 */
   sandboxRunning: boolean;
+  /** latest set property */
+  latestSetProp?: PropertyKey | null;
   /** 启动沙箱 */
   active(): void;
   /** 关闭沙箱 */
