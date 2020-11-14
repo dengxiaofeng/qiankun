@@ -7,3 +7,4 @@
 /coverage
 .cache
 examples
+package-lock.json

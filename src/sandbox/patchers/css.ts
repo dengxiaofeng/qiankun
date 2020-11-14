@@ -19,7 +19,6 @@ enum RuleType {
   KEYFRAME = 8,
 }
 
-const rawPublicPath = window.__INJECTED_PUBLIC_PATH_BY_QIANKUN__;
 const arrayify = <T>(list: CSSRuleList | any[]) => {
   return [].slice.call(list, 0) as T[];
 };
@@ -49,8 +48,12 @@ export class ScopedCSS {
       const sheet = this.swapNode.sheet as any; // type is missing
       const rules = arrayify<CSSRule>(sheet?.cssRules ?? []);
       const css = this.rewrite(rules, prefix);
+
+      const publicPath = window.__webpack_public_path__;
+      const transformCss = css.replace(/<%= __webpack_public_path__ %>/g, publicPath as string);
+
       // eslint-disable-next-line no-param-reassign
-      styleNode.textContent = css;
+      styleNode.textContent = transformCss;
 
       // cleanup
       this.swapNode.removeChild(textNode);
@@ -159,8 +162,6 @@ export class ScopedCSS {
         return `${p}${prefix} ${s.replace(/^ */, '')}`;
       }),
     );
-    // @ts-ignore
-    cssText = cssText.replace(/<%= __webpack_public_path__ %>/, rawPublicPath);
     return cssText;
   }
 

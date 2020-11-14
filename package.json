@@ -38,7 +38,7 @@
     "prepublishOnly": "yarn lint && yarn test && yarn build",
     "lint": "yarn lint:js && yarn lint:prettier",
     "lint:js": "eslint --cache --ext .js,.jsx,.ts,.tsx --format=pretty ./src",
-    "lint:fix": "yarn lint:js -- --fix",
+    "lint:fix": "yarn lint:js --fix",
     "lint:prettier": "prettier -c ./src/**/*",
     "prettier": "prettier --write ./src/**/*",
     "docs:dev": "dumi dev",
