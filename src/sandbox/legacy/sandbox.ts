@@ -2,10 +2,11 @@
  * @author Kuitos
  * @since 2019-04-11
  */
-import { SandBox, SandBoxType } from '../../interfaces';
+import type { SandBox } from '../../interfaces';
+import { SandBoxType } from '../../interfaces';
 import { getTargetValue } from '../common';
 
-function isPropConfigurable(target: object, prop: PropertyKey) {
+function isPropConfigurable(target: typeof window, prop: PropertyKey) {
   const descriptor = Object.getOwnPropertyDescriptor(target, prop);
   return descriptor ? descriptor.configurable : true;
 }
@@ -72,13 +73,12 @@ export default class SingularProxySandbox implements SandBox {
     this.type = SandBoxType.LegacyProxy;
     const { addedPropsMapInSandbox, modifiedPropsOriginalValueMapInSandbox, currentUpdatedPropsValueMap } = this;
 
-    const self = this;
     const rawWindow = window;
     const fakeWindow = Object.create(null) as Window;
 
     const proxy = new Proxy(fakeWindow, {
-      set(_: Window, p: PropertyKey, value: any): boolean {
-        if (self.sandboxRunning) {
+      set: (_: Window, p: PropertyKey, value: any): boolean => {
+        if (this.sandboxRunning) {
           if (!rawWindow.hasOwnProperty(p)) {
             addedPropsMapInSandbox.set(p, value);
           } else if (!modifiedPropsOriginalValueMapInSandbox.has(p)) {
@@ -92,7 +92,7 @@ export default class SingularProxySandbox implements SandBox {
           // eslint-disable-next-line no-param-reassign
           (rawWindow as any)[p] = value;
 
-          self.latestSetProp = p;
+          this.latestSetProp = p;
 
           return true;
         }
@@ -121,6 +121,15 @@ export default class SingularProxySandbox implements SandBox {
       // see https://github.com/styled-components/styled-components/blob/master/packages/styled-components/src/constants.js#L12
       has(_: Window, p: string | number | symbol): boolean {
         return p in rawWindow;
+      },
+
+      getOwnPropertyDescriptor(_: Window, p: PropertyKey): PropertyDescriptor | undefined {
+        const descriptor = Object.getOwnPropertyDescriptor(rawWindow, p);
+        // A property cannot be reported as non-configurable, if it does not exists as an own property of the target object
+        if (descriptor && !descriptor.configurable) {
+          descriptor.configurable = true;
+        }
+        return descriptor;
       },
     });
 

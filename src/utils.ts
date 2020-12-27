@@ -4,7 +4,7 @@
  */
 
 import { isFunction, snakeCase } from 'lodash';
-import { FrameworkConfiguration } from './interfaces';
+import type { FrameworkConfiguration } from './interfaces';
 
 export function toArray<T>(array: T | T[]): T[] {
   return Array.isArray(array) ? array : [array];
@@ -22,7 +22,7 @@ export function nextTick(cb: () => void): void {
   Promise.resolve().then(cb);
 }
 
-const constructableMap = new WeakMap<Function, boolean>();
+const constructableMap = new WeakMap<any | FunctionConstructor, boolean>();
 export function isConstructable(fn: () => any | FunctionConstructor) {
   if (constructableMap.has(fn)) {
     return constructableMap.get(fn);
@@ -82,7 +82,7 @@ export function validateExportLifecycle(exports: any) {
 class Deferred<T> {
   promise: Promise<T>;
 
-  resolve!: (value?: T | PromiseLike<T>) => void;
+  resolve!: (value: T | PromiseLike<T>) => void;
 
   reject!: (reason?: any) => void;
 
@@ -101,7 +101,16 @@ const supportsUserTiming =
   typeof performance.mark === 'function' &&
   typeof performance.clearMarks === 'function' &&
   typeof performance.measure === 'function' &&
-  typeof performance.clearMeasures === 'function';
+  typeof performance.clearMeasures === 'function' &&
+  typeof performance.getEntriesByName === 'function';
+
+export function performanceGetEntriesByName(markName: string, type?: string) {
+  let marks = null;
+  if (supportsUserTiming) {
+    marks = performance.getEntriesByName(markName, type);
+  }
+  return marks;
+}
 
 export function performanceMark(markName: string) {
   if (supportsUserTiming) {
