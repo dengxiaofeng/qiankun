@@ -1,7 +1,14 @@
 import { noop } from 'lodash';
 import type { ParcelConfigObject } from 'single-spa';
 import { mountRootParcel, registerApplication, start as startSingleSpa } from 'single-spa';
-import type { ObjectType , FrameworkConfiguration, FrameworkLifeCycles, LoadableApp, MicroApp, RegistrableApp } from './interfaces';
+import type {
+  ObjectType,
+  FrameworkConfiguration,
+  FrameworkLifeCycles,
+  LoadableApp,
+  MicroApp,
+  RegistrableApp,
+} from './interfaces';
 
 import type { ParcelConfigObjectGetter } from './loader';
 import { loadApp } from './loader';
