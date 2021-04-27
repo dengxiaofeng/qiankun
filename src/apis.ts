@@ -117,7 +117,7 @@ export function loadMicroApp<T extends ObjectType>(
         if (parcelConfigGetterPromise) return wrapParcelConfigForRemount((await parcelConfigGetterPromise)(container));
       }
     }
-
+    /*loadApp*/
     const parcelConfigObjectGetterPromise = loadApp(app, userConfiguration, lifeCycles);
 
     if (container) {
