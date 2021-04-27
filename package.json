@@ -1,6 +1,6 @@
 {
   "name": "qiankun",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "description": "An completed implementation of Micro Frontends",
   "keywords": [
     "micro frontend",
@@ -34,7 +34,7 @@
     "install:vue3": "cd examples/vue3 && yarn",
     "start:vue3": "cd examples/vue3 && yarn start",
     "build": "father-build",
-    "release": "np --no-cleanup --yolo --no-release-draft ",
+    "release": "sh ./release.sh",
     "prepublishOnly": "yarn lint && yarn test && yarn build",
     "lint": "yarn lint:js && yarn lint:prettier",
     "lint:js": "eslint --cache --ext .js,.jsx,.ts,.tsx --format=pretty ./src",
@@ -91,11 +91,6 @@
   },
   "resolutions": {
     "@types/react": "^16.x"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   },
   "lint-staged": {
     "**/*.{js,ts,json,css,md}": [
