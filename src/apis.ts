@@ -14,7 +14,7 @@ import type {
   ObjectType,
   RegistrableApp,
 } from './interfaces';
-/* */
+/* 5 */
 import type { ParcelConfigObjectGetter } from './loader';
 import { loadApp } from './loader';
 import { doPrefetchStrategy } from './prefetch';
