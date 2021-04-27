@@ -40,7 +40,7 @@ export class ScopedCSS {
     this.sheet = styleNode.sheet!;
     this.sheet.disabled = true;
   }
-
+  /*e*/
   process(styleNode: HTMLStyleElement, prefix: string = '') {
     if (styleNode.textContent !== '') {
       const textNode = document.createTextNode(styleNode.textContent || '');

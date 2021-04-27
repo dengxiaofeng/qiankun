@@ -3,11 +3,17 @@
  * @since 2020-03-02
  */
 
-import { concat, mergeWith } from 'lodash';
-import type { FrameworkLifeCycles, ObjectType } from '../interfaces';
+import {
+  concat,
+  mergeWith,
+} from 'lodash';
 
-import getRuntimePublicPathAddOn from './runtimePublicPath';
+import type {
+  FrameworkLifeCycles,
+  ObjectType,
+} from '../interfaces';
 import getEngineFlagAddon from './engineFlag';
+import getRuntimePublicPathAddOn from './runtimePublicPath';
 
 /* es */
 export default function getAddOns<T extends ObjectType>(global: Window, publicPath: string): FrameworkLifeCycles<T> {
