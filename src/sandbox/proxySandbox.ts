@@ -306,8 +306,8 @@ export default class ProxySandbox implements SandBox {
       },
 
       // trap to support iterator with sandbox
-      
-      ownKeys(target: FakeWindow): ArrayLike<any> {
+      /*  */
+      ownKeys(target: FakeWindow): ArrayLike<string | symbol> {
         return uniq(Reflect.ownKeys(rawWindow).concat(Reflect.ownKeys(target)));
       },
 
