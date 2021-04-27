@@ -6,7 +6,10 @@
 import type { SandBox } from '../interfaces';
 import { SandBoxType } from '../interfaces';
 import { nextTick } from '../utils';
-import { getTargetValue, setCurrentRunningSandboxProxy } from './common';
+import {
+  getTargetValue,
+  setCurrentRunningSandboxProxy,
+} from './common';
 
 /**
  * fastest(at most time) unique array method
@@ -303,6 +306,7 @@ export default class ProxySandbox implements SandBox {
       },
 
       // trap to support iterator with sandbox
+      
       ownKeys(target: FakeWindow): ArrayLike<string | symbol> {
         return uniq(Reflect.ownKeys(rawWindow).concat(Reflect.ownKeys(target)));
       },
