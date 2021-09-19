@@ -18,7 +18,7 @@ declare global {
 
 // RIC and shim for browsers setTimeout() without it
 const requestIdleCallback =
-  window.requestIdleCallback ||
+  (window as any).requestIdleCallback ||
   function requestIdleCallback(cb: CallableFunction) {
     const start = Date.now();
     return setTimeout(() => {
@@ -31,11 +31,11 @@ const requestIdleCallback =
     }, 1);
   };
 
-const isSlowNetwork = navigator.connection
-  ? navigator.connection.saveData ||
-    (navigator.connection.type !== 'wifi' &&
-      navigator.connection.type !== 'ethernet' &&
-      /([23])g/.test(navigator.connection.effectiveType))
+const isSlowNetwork = (window as any).navigator.connection
+  ? (window as any).navigator.connection.saveData ||
+    ((window as any).navigator.connection.type !== 'wifi' &&
+      (window as any).navigator.connection.type !== 'ethernet' &&
+      /([23])g/.test((window as any).navigator.connection.effectiveType))
   : false;
 
 /**
@@ -44,7 +44,7 @@ const isSlowNetwork = navigator.connection
  * @param opts
  */
 function prefetch(entry: Entry, opts?: ImportEntryOpts): void {
-  if (!navigator.onLine || isSlowNetwork) {
+  if ((window as any).navigator.onLine || isSlowNetwork) {
     // Don't prefetch if in a slow network or offline
     return;
   }
