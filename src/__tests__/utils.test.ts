@@ -3,9 +3,11 @@ import {
   getDefaultTplWrapper,
   getWrapperId,
   getXPathForElement,
+  nextTask,
   sleep,
   validateExportLifecycle,
 } from '../utils';
+import { version } from '../../package.json';
 
 test('should wrap the id [1]', () => {
   const id = 'REACT16';
@@ -25,7 +27,9 @@ test('should wrap string with div', () => {
 
   const ret = factory(tpl);
 
-  expect(ret).toBe(`<div id="__qiankun_microapp_wrapper_for_react_16__" data-name="react16">${tpl}</div>`);
+  expect(ret).toBe(
+    `<div id="__qiankun_microapp_wrapper_for_react_16__" data-name="react16" data-version="${version}">${tpl}</div>`,
+  );
 });
 
 test('should be able to validate lifecycle', () => {
@@ -109,10 +113,27 @@ test('should getXPathForElement work well', () => {
   const xpath = getXPathForElement(testNode!, document);
   expect(xpath).toEqual(
     // eslint-disable-next-line max-len
-    `/*[name()='HTML' and namespace-uri()='http://www.w3.org/1999/xhtml']/*[name()='BODY' and namespace-uri()='http://www.w3.org/1999/xhtml'][1]/*[name()='ARTICLE' and namespace-uri()='http://www.w3.org/1999/xhtml'][1]/*[name()='DIV' and namespace-uri()='http://www.w3.org/1999/xhtml'][1]/*[name()='DIV' and namespace-uri()='http://www.w3.org/1999/xhtml'][2]`,
+    `/*[name()='HTML']/*[name()='BODY'][1]/*[name()='ARTICLE'][1]/*[name()='DIV'][1]/*[name()='DIV'][2]`,
   );
 
   const virtualDOM = document.createElement('div');
   const xpath1 = getXPathForElement(virtualDOM, document);
   expect(xpath1).toBeUndefined();
+});
+
+it('should nextTick just executed once in one task context', async () => {
+  let counter = 0;
+  nextTask(() => ++counter);
+  nextTask(() => ++counter);
+  nextTask(() => ++counter);
+  nextTask(() => ++counter);
+  await sleep(0);
+  expect(counter).toBe(1);
+
+  await sleep(0);
+  nextTask(() => ++counter);
+  await sleep(0);
+  nextTask(() => ++counter);
+  await sleep(0);
+  expect(counter).toBe(3);
 });

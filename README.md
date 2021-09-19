@@ -19,7 +19,7 @@ Qiankun enables you and your teams to build next-generation and enterprise-ready
 
 ## 🤔 Motivation
 
-A quick recap about the concept of 'Micro Frontents':
+A quick recap about the concept of 'Micro Frontends':
 
 > Techniques, strategies and recipes for building a **modern web app** with **multiple teams** using **different JavaScript frameworks**. — [Micro Frontends](https://micro-frontends.org/)
 
@@ -72,7 +72,7 @@ The documentation is divided into several sections:
 * [Tutorial](https://qiankun.umijs.org/cookbook)
 * [API Reference](https://qiankun.umijs.org/api)
 * [FAQ](https://qiankun.umijs.org/faq)
-* [Community](https://qiankun.umijs.org/#communit)
+* [Community](https://qiankun.umijs.org/#community)
 
 
 ## 💿 Examples

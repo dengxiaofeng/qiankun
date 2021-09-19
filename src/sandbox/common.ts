@@ -5,13 +5,18 @@
 
 import { isBoundedFunction, isCallable, isConstructable } from '../utils';
 
-let currentRunningSandboxProxy: WindowProxy | null = null;
-export function getCurrentRunningSandboxProxy() {
-  return currentRunningSandboxProxy;
+type AppInstance = { name: string; window: WindowProxy };
+let currentRunningApp: AppInstance | null = null;
+/**
+ * get the app that running tasks at current tick
+ */
+export function getCurrentRunningApp() {
+  return currentRunningApp;
 }
 
-export function setCurrentRunningSandboxProxy(proxy: WindowProxy | null) {
-  currentRunningSandboxProxy = proxy;
+export function setCurrentRunningApp(appInstance: { name: string; window: WindowProxy } | null) {
+  // set currentRunningApp and it's proxySandbox to global window, as its only use case is for document.createElement from now on, which hijacked by a global way
+  currentRunningApp = appInstance;
 }
 
 const functionBoundedValueMap = new WeakMap<CallableFunction, CallableFunction>();

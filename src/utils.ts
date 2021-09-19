@@ -4,6 +4,8 @@
  */
 
 import { isFunction, snakeCase } from 'lodash';
+import { version } from './version';
+
 import type { FrameworkConfiguration } from './interfaces';
 
 export function toArray<T>(array: T | T[]): T[] {
@@ -14,12 +16,24 @@ export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// Promise.then might be synchronized in Zone.js context, we need to use setTimeout instead to mock next tick.
+const nextTick: (cb: () => void) => void =
+  typeof window.Zone === 'function' ? setTimeout : (cb) => Promise.resolve().then(cb);
+
+let globalTaskPending = false;
 /**
- * run a callback after next tick
+ * Run a callback before next task executing, and the invocation is idempotent in every singular task
+ * That means even we called nextTask multi times in one task, only the first callback will be pushed to nextTick to be invoked.
  * @param cb
  */
-export function nextTick(cb: () => void): void {
-  Promise.resolve().then(cb);
+export function nextTask(cb: () => void): void {
+  if (!globalTaskPending) {
+    globalTaskPending = true;
+    nextTick(() => {
+      cb();
+      globalTaskPending = false;
+    });
+  }
 }
 
 const fnRegexCheckCacheMap = new WeakMap<any | FunctionConstructor, boolean>();
@@ -88,7 +102,7 @@ export function isBoundedFunction(fn: CallableFunction) {
 }
 
 export function getDefaultTplWrapper(id: string, name: string) {
-  return (tpl: string) => `<div id="${getWrapperId(id)}" data-name="${name}">${tpl}</div>`;
+  return (tpl: string) => `<div id="${getWrapperId(id)}" data-name="${name}" data-version="${version}">${tpl}</div>`;
 }
 
 export function getWrapperId(id: string) {
@@ -187,16 +201,12 @@ export function getXPathForElement(el: Node, document: Document): string | void 
       tmpEle = tmpEle.previousSibling;
     }
 
-    xpath = `*[name()='${element.nodeName}' and namespace-uri()='${
-      element.namespaceURI === null ? '' : element.namespaceURI
-    }'][${pos}]/${xpath}`;
+    xpath = `*[name()='${element.nodeName}'][${pos}]/${xpath}`;
 
     element = element.parentNode!;
   }
 
-  xpath = `/*[name()='${document.documentElement.nodeName}' and namespace-uri()='${
-    element.namespaceURI === null ? '' : element.namespaceURI
-  }']/${xpath}`;
+  xpath = `/*[name()='${document.documentElement.nodeName}']/${xpath}`;
   xpath = xpath.replace(/\/$/, '');
 
   return xpath;
@@ -204,4 +214,15 @@ export function getXPathForElement(el: Node, document: Document): string | void 
 
 export function getContainer(container: string | HTMLElement): HTMLElement | null {
   return typeof container === 'string' ? document.querySelector(container) : container;
+}
+
+export function getContainerXPath(container?: string | HTMLElement): string | void {
+  if (container) {
+    const containerElement = getContainer(container);
+    if (containerElement) {
+      return getXPathForElement(containerElement, document);
+    }
+  }
+
+  return undefined;
 }
