@@ -69,6 +69,7 @@ export function registerMicroApps<T extends ObjectType>(
   });
 }
 
+
 const appConfigPromiseGetterMap = new Map<string, Promise<ParcelConfigObjectGetter>>();
 
 export function loadMicroApp<T extends ObjectType>(
