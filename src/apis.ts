@@ -52,7 +52,6 @@ export function registerMicroApps<T extends ObjectType>(
       app: async () => {
         loader(true);
         await frameworkStartedDefer.promise;
-
         const { mount, ...otherMicroAppConfigs } = (
           await loadApp({ name, props, ...appConfig }, frameworkConfiguration, lifeCycles)
         )();
