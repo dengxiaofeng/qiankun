@@ -5,16 +5,8 @@
  */
 import type { SandBox } from '../interfaces';
 import { SandBoxType } from '../interfaces';
-<<<<<<< HEAD
-import { nextTick } from '../utils';
-import {
-  getTargetValue,
-  setCurrentRunningSandboxProxy,
-} from './common';
-=======
 import { nextTask } from '../utils';
 import { getTargetValue, setCurrentRunningApp } from './common';
->>>>>>> 3049246d85668eed43aef49df0f5ec8753d96a1b
 
 /**
  * fastest(at most time) unique array method
