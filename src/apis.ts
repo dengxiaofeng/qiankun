@@ -42,6 +42,7 @@ export function registerMicroApps<T extends ObjectType>(
   // Each app only needs to be registered once
   const unregisteredApps = apps.filter((app) => !microApps.some((registeredApp) => registeredApp.name === app.name));
 
+
   microApps = [...microApps, ...unregisteredApps];
 
   unregisteredApps.forEach((app) => {
