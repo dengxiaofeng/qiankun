@@ -56,6 +56,7 @@ export function registerMicroApps<T extends ObjectType>(
           await loadApp({ name, props, ...appConfig }, frameworkConfiguration, lifeCycles)
         )();
 
+
         return {
           mount: [async () => loader(true), ...toArray(mount), async () => loader(false)],
           ...otherMicroAppConfigs,
