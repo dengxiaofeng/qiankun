@@ -10,6 +10,7 @@ export function addGlobalUncaughtErrorHandler(errorHandler: OnErrorEventHandlerN
   window.addEventListener('unhandledrejection', errorHandler);
 }
 
+
 export function removeGlobalUncaughtErrorHandler(errorHandler: (...args: any[]) => any) {
   window.removeEventListener('error', errorHandler);
   window.removeEventListener('unhandledrejection', errorHandler);

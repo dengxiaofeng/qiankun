@@ -9,7 +9,6 @@ import type { OnGlobalStateChangeCallback, MicroAppStateActions } from './interf
 let globalState: Record<string, any> = {};
 
 const deps: Record<string, OnGlobalStateChangeCallback> = {};
-
 // 触发全局监听
 function emitGlobal(state: Record<string, any>, prevState: Record<string, any>) {
   Object.keys(deps).forEach((id: string) => {
