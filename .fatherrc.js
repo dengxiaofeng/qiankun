@@ -13,6 +13,8 @@ export default {
   umd: {
     minFile: true,
     sourcemap: true,
+    name: 'qiankun',
+    file: 'index.umd.js'
   },
   runtimeHelpers: true,
   extraBabelPlugins: [

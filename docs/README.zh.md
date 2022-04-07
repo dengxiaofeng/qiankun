@@ -40,8 +40,8 @@ loadMicroApp({
 
 参考：[快速上手](/zh/guide/getting-started)。
 
-## 社区
+## 👬 社区
 
 | Github Discussions | 钉钉群 |
 | --- | --- |
-| [qiankun discussions](https://github.com/umijs/qiankun/discussions) | <img src="https://gw.alipayobjects.com/mdn/rms_655822/afts/img/A*9U6OSKHyMHUAAAAAAAAAAAAAARQnAQ" width="150" /> |
+| [qiankun discussions](https://github.com/umijs/qiankun/discussions) | <img src="https://gw.alipayobjects.com/mdn/rms_655822/afts/img/A*fqcCSK2OyjEAAAAAAAAAAAAAARQnAQ" width="150" /> |

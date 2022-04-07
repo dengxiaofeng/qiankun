@@ -30,7 +30,26 @@ To solve the exception, try the following steps:
 
 6. If the development environment is OK but the production environment is not, check whether the `index.html` and `entry js` of the micro app are returned normally, for example, `404.html` is returned.
 
-7. If you're using webpack5, please see [here](https://github.com/umijs/qiankun/issues/1092) If it still not works after the steps above, this is usually due to browser compatibility issues. Try to **set the webpack `output.library` of the broken sub app the same with your main app registration for your app**, such as:
+7. If you're using webpack5, please see [here](https://github.com/umijs/qiankun/issues/1092) 
+
+8. Check whether the main app and micro-app use AMD or CommonJS. Check method: run the main app and the micro-app independently, and enter the following code in the console: `(typeof exports === 'object' && typeof module === 'object') || (typeof define === 'function' && define.amd) || typeof exports === 'object'`，If it returns `true`，that it is caused by this reason, and there are mainly the following two solutions:
+
+    - Solution 1: Modify the `libraryTarget` of the micro-app `webpack` to `'window'`.
+
+    ```diff
+    const packageName = require('./package.json').name;
+    module.exports = {
+      output: {
+        library: `${packageName}-[name]`,
+    -    libraryTarget: 'umd',
+    +    libraryTarget: 'window',
+        jsonpFunction: `webpackJsonp_${packageName}`,
+      },
+    };
+    ```
+    - Solution 2: The micro-app is not bundle with `umd`, directly mount the life cycle function to the `window` in the entry file, refer to[Micro app built without webpack](/guide/tutorial#micro-app-built-without-webpack).
+ 
+9. If it still not works after the steps above, this is usually due to browser compatibility issues. Try to **set the webpack `output.library` of the broken sub app the same with your main app registration for your app**, such as:
 
 Such as here is the main configuration:
 
@@ -216,7 +235,7 @@ if (inBrowser && window.Vue) {
 To solve the error, choose one of the options listed below:
 
 1. Use bundler to pack `Vue` library, instead of CDN or external module
-2. Rename `Vue` to other name in master application, eg: `window.Vue2 = window.Vue; window.Vue = undefined`
+2. Rename `Vue` to other name in master application, eg: `window.Vue2 = window.Vue; delete window.Vue`
 
 ## Why dynamic imported assets missing?
 
@@ -457,6 +476,71 @@ Yes it is.
 Since qiankun get assets which imported by sub app via fetch, these static resources must be required to support [cors](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS).
 
 See [Enable Nginx Cors](https://enable-cors.org/server_nginx.html).
+
+## How to solve that micro apps loaded failed due to abnormal scripts inserted dynamically by carriers
+
+Scripts inserted by carriers are usually marked with `async` to avoid loading of block micro apps. This is usually no problem, such as:
+
+```html
+<script async src="//www.rogue.com/rogue.js"></script>
+```
+
+However, if some inserted scripts are not marked as `async`, once such scripts fail to run, the entire application will be blocked and subsequent scripts will no longer be executed. We can solve this problem in the following ways:
+
+### Use a custom `getTemplate` method
+
+Filter abnormal scripts in the HTML template of the micro app through the `getTemplate` method implemented by yourself.
+
+```js
+import { start } from 'qiankun';
+
+start({
+  getTemplate(tpl) {
+    return tpl.replace('<script src="/to-be-replaced.js"><script>', '');
+  },
+});
+```
+
+### Use custom fetch method
+
+Intercept abnormal scripts through the `fetch` method implemented by yourself.
+
+```js
+import { start } from 'qiankun';
+
+start({
+  async fetch(url, ...args) {
+    if (url === 'http://to-be-replaced.js') {
+      return {
+        async text() {
+          return '';
+        },
+      };
+    }
+
+    return window.fetch(url, ...args);
+  },
+});
+```
+
+### Change the response Content-type of micro app's HTML to `text/plain` (ultimate solution)
+
+The principle is that the carriers can only recognize the request whose response's `content-type` is `text/html` and insert the script, and the response of the `text/plain` type will not be hijacked.
+
+How to modify the `content-type` of the response header of the micro-application HTML request, you can google it yourself, and there is a simpler and more efficient solution:
+
+1. Copy an `index.txt` file from `index.html` when the micro-app is published.
+
+2. Change `entry` in the main app to a txt address, for example:
+
+   ```diff
+   registerMicroApps(
+     [
+   -    { name: 'app1', entry: '//localhost:8080/index.html', container, activeRule },
+   +    { name: 'app1', entry: '//localhost:8080/index.txt', container, activeRule },
+     ],
+   );
+   ```
 
 ## How to guarantee the main app stylesheet isolated with sub apps?
 
