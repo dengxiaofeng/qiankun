@@ -105,9 +105,11 @@ export function getDefaultTplWrapper(name: string) {
   return (tpl: string) => `<div id="${getWrapperId(name)}" data-name="${name}" data-version="${version}">${tpl}</div>`;
 }
 
+
 export function getWrapperId(name: string) {
   return `__qiankun_microapp_wrapper_for_${snakeCase(name)}__`;
 }
+
 
 // eslint-disable-next-line no-new-func
 export const nativeGlobal = new Function('return this')();
